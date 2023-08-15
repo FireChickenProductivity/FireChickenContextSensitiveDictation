@@ -46,24 +46,45 @@ class ContextSensitiveDictationActions:
             before, after = None, None
             actions.insert(" ")
             if left:
-                actions.edit.extend_word_left()
-                actions.edit.extend_word_left()
+                actions.user.fire_chicken_context_sensitive_dictation_select_before()
                 wait_copy_delay()
-                before: str = actions.edit.selected_text()[:-1]
+                selected_text: str = actions.edit.selected_text()
+                before: str = selected_text[:-1]
                 if should_display_debug_output(): print_debug_output(f'Before text is: ({before})')
-                actions.edit.right()
+                actions.user.fire_chicken_context_sensitive_dictation_unselect_before(before, selected_text)
             if not right:
                 actions.key("backspace")  # remove the space
             else:
-                actions.edit.left()
-                actions.edit.extend_word_right()
-                actions.edit.extend_word_right()
+                actions.user.fire_chicken_context_sensitive_dictation_select_after()
                 wait_copy_delay()
-                after: str = actions.edit.selected_text()[1:]
+                selected_text: str = actions.edit.selected_text()
+                after: str = selected_text[1:]
                 if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
-                actions.edit.left()
+                actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
                 actions.key("delete")  # remove space
             return before, after
+
+module = Module()
+@module.action_class
+class Actions:
+    def fire_chicken_context_sensitive_dictation_select_before():
+        '''Selects the text before the cursor for context sensitive dictation'''
+        actions.edit.extend_word_left()
+        actions.edit.extend_word_left()
+    
+    def fire_chicken_context_sensitive_dictation_unselect_before(before: str, selected_text: str):
+        '''Unselects the text before the cursor for context sensitive dictation'''
+        actions.edit.right()
+
+    def fire_chicken_context_sensitive_dictation_select_after():
+        '''Selects the text after the cursor for context sensitive dictation'''
+        actions.edit.left()
+        actions.edit.extend_word_right()
+        actions.edit.extend_word_right()
+    
+    def fire_chicken_context_sensitive_dictation_unselect_after(after: str, selected_text: str):
+        '''Unselects the text after the cursor for context sensitive dictation'''
+        actions.edit.left()
 
 def print_debug_output(output: str):
     print('ContextSensitiveDictation:', output)
