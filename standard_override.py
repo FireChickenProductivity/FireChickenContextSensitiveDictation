@@ -18,6 +18,13 @@ debug_mode_setting = module.setting(
     desc = 'If nonzero, debug information is printed to the console'
 )
 
+should_use_basic_action_recorder_for_context = module.setting(
+    'fire_chicken_context_sensitive_dictation_use_basic_action_recorder_for_context',
+    type = int,
+    default = 0,
+    desc = 'If nonzero and the basic action recorder is installed, fire chicken context sensitive dictation uses it for context information when the user has not used a non insert action'
+)
+
 standard_override_context = Context()
 standard_override_context.matches = r'''
 tag: user.fire_chicken_context_sensitive_dictation
@@ -43,6 +50,8 @@ class ContextSensitiveDictationActions:
             """
             if not (left or right):
                 return None, None
+            global performing_dictation_peek
+            performing_dictation_peek = True
             before, after = None, None
             actions.insert(" ")
             if left:
@@ -62,7 +71,47 @@ class ContextSensitiveDictationActions:
                 if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
                 actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
                 actions.key("delete")  # remove space
+            performing_dictation_peek = False
             return before, after
+
+performing_dictation_peek: bool = False
+
+class StoredContext:
+    def __init__(self):
+        self.stored_before: str = ''
+        self.stored_after: str = ''
+        self.has_before_information: bool = False
+        self.has_after_information: bool = False
+    
+    def consider_context_irrelevant(self):
+        self.has_before_information = False
+        self.has_after_information = False
+        self.stored_before = ''
+        self.stored_after = ''
+    
+    def update_before(self, before: str):
+        self.stored_before = before
+        self.has_before_information = True
+    
+    def update_after(self, after: str):
+        self.stored_after = after
+        self.has_after_information = True
+    
+    def has_relevant_before_information(self):
+        return self.has_before_information
+    
+    def has_relevant_after_information(self):
+        return self.has_after_information
+    
+    def get_before(self):
+        return self.stored_before
+    
+    def get_after(self):
+        return self.stored_after
+stored_context = StoredContext()
+
+def on_basic_action(action):
+    pass
 
 module = Module()
 @module.action_class
