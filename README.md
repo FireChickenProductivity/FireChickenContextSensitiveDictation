@@ -1,5 +1,5 @@
 # Fire Chicken Context Sensitive Dictation
-This repository offers code for overriding the default behavior of the talon community repository context sensitive dictation to make customization easier. Offering a specific version specifically for Microsoft Word on a windows machine is planned.
+This repository offers code for overriding the default behavior of the talon community repository context sensitive dictation to make customization easier. It also offers an experimental application specific override for Microsoft Word.
 
 # Settings
 user.fire_chicken_context_sensitive_dictation_copy_delay: determines how long in milliseconds to pause before copying text to prevent the scenario of accidentally copying nothing. Default: 200.
