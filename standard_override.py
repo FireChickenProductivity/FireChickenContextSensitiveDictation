@@ -111,7 +111,12 @@ class StoredContext:
 stored_context = StoredContext()
 
 def on_basic_action(action):
-    pass
+    global stored_context
+    if action.get_name() == 'insert':
+        inserted_text = action.get_arguments()[0]
+        stored_context.update_before(inserted_text)
+    else:
+        stored_context.consider_context_irrelevant()
 
 module = Module()
 @module.action_class
