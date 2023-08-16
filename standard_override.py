@@ -1,4 +1,4 @@
-from talon import Module, Context, actions
+from talon import Module, Context, actions, app
 from typing import Optional
 
 module = Module()
@@ -122,12 +122,13 @@ class StoredContext:
 stored_context = StoredContext()
 
 def on_basic_action(action):
-    global stored_context
-    if action.get_name() == 'insert':
-        inserted_text = action.get_arguments()[0]
-        stored_context.update_before(inserted_text)
-    else:
-        stored_context.consider_context_irrelevant()
+    if should_use_basic_action_recorder_for_context.get():
+        global stored_context
+        if action.get_name() == 'insert':
+            inserted_text = action.get_arguments()[0]
+            stored_context.update_before(inserted_text)
+        else:
+            stored_context.consider_context_irrelevant()
 
 module = Module()
 @module.action_class
@@ -163,3 +164,9 @@ def wait_delay_setting(setting):
 
 def should_display_debug_output():
     return debug_mode_setting.get()
+
+def setup():
+    try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, 'FireChickenContextSensitiveDictation')
+    except: print('')
+
+app.register('ready', setup)
