@@ -98,7 +98,10 @@ class StoredContext:
         self.stored_after = ''
     
     def update_before(self, before: str):
-        self.stored_before = before
+        if before.isspace():
+            self.stored_before += before
+        else:
+            self.stored_before = before
         self.has_before_information = True
     
     def update_after(self, after: str):
