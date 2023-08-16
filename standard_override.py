@@ -51,14 +51,14 @@ class ContextSensitiveDictationActions:
             if not (left or right):
                 return None, None
             global stored_context
-            if stored_context.has_before_information() and stored_context.has_after_information() and should_use_basic_action_recorder_for_context.get():
+            if stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get():
                 return stored_context.get_before(), stored_context.get_after()
             global performing_dictation_peek
             performing_dictation_peek = True
             before, after = None, None
             actions.insert(" ")
             if left:
-                if stored_context.has_before_information() and should_use_basic_action_recorder_for_context.get():
+                if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
                     before = stored_context.get_before()
                 else:
                     actions.user.fire_chicken_context_sensitive_dictation_select_before()
@@ -77,7 +77,7 @@ class ContextSensitiveDictationActions:
                 if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
                 actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
                 actions.key("delete")  # remove space
-                if should_use_basic_action_recorder_for_context.get() and not stored_context.has_after_information():
+                if should_use_basic_action_recorder_for_context.get() and not stored_context.has_relevant_after_information():
                     stored_context.update_after(after)
             performing_dictation_peek = False
             return before, after
