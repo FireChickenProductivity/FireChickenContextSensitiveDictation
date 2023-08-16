@@ -122,7 +122,7 @@ class StoredContext:
 stored_context = StoredContext()
 
 def on_basic_action(action):
-    if should_use_basic_action_recorder_for_context.get():
+    if should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek:
         global stored_context
         if action.get_name() == 'insert':
             inserted_text = action.get_arguments()[0]
