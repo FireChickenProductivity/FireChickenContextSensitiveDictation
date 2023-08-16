@@ -166,7 +166,7 @@ def should_display_debug_output():
     return debug_mode_setting.get()
 
 def setup():
-    if should_use_basic_action_recorder_for_context.get(): register_basic_action_recorder_callback_function()
+    handle_should_use_basic_action_recorder_for_context_setting_change(should_use_basic_action_recorder_for_context.get())
 
 REGISTRATION_NAME: str = 'FireChickenContextSensitiveDictation'
 def register_basic_action_recorder_callback_function():
