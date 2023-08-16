@@ -77,7 +77,7 @@ class ContextSensitiveDictationActions:
                 if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
                 actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
                 actions.key("delete")  # remove space
-                if should_use_basic_action_recorder_for_context.get() and not stored_context.has_relevant_after_information():
+                if should_use_basic_action_recorder_for_context.get():
                     stored_context.update_after(after)
             performing_dictation_peek = False
             return before, after
