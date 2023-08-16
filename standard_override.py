@@ -167,6 +167,6 @@ def should_display_debug_output():
 
 def setup():
     try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, 'FireChickenContextSensitiveDictation')
-    except: print('')
+    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
 
 app.register('ready', setup)
