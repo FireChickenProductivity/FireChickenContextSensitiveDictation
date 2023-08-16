@@ -1,4 +1,4 @@
-from talon import Module, Context, actions, app
+from talon import Module, Context, actions, app, settings
 from typing import Optional
 
 module = Module()
@@ -166,7 +166,22 @@ def should_display_debug_output():
     return debug_mode_setting.get()
 
 def setup():
-    try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, 'FireChickenContextSensitiveDictation')
+    if should_use_basic_action_recorder_for_context.get(): register_basic_action_recorder_callback_function()
+
+REGISTRATION_NAME: str = 'FireChickenContextSensitiveDictation'
+def register_basic_action_recorder_callback_function():
+    try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, REGISTRATION_NAME)
     except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
+
+def unregister_basic_action_recorder_callback_function():
+    try: actions.user.basic_action_recorder_unregister_callback_function_with_name(REGISTRATION_NAME)
+    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
+
+def handle_should_use_basic_action_recorder_for_context_setting_change(new_value):
+    if new_value: register_basic_action_recorder_callback_function()
+    else: unregister_basic_action_recorder_callback_function()
+    stored_context.consider_context_irrelevant()
+
+settings.register('user.fire_chicken_context_sensitive_dictation_use_basic_action_recorder_for_context', handle_should_use_basic_action_recorder_for_context_setting_change)
 
 app.register('ready', setup)
