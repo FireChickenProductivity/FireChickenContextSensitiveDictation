@@ -114,15 +114,24 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_perform_manual_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
         '''Performs the manual peek for fire chicken context sensitive dictation'''
         before, after = None, None
-        actions.insert(" ")
+        actions.user.fire_chicken_context_sensitive_dictation_perform_before_peek_setup(left, right)
         if left:
             before = actions.user.fire_chicken_context_sensitive_dictation_perform_peek_left()
-        if not right:
-            actions.key("backspace")  # remove the space
-        else:
+        if right:
             after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_right()
-            actions.key("delete")  # remove space
+        actions.user.fire_chicken_context_sensitive_dictation_perform_after_peek_cleanup(left, right, before, after)
         return before, after
+    
+    def fire_chicken_context_sensitive_dictation_perform_before_peek_setup(left: bool, right: bool):
+        '''Performs the initial setup for the fire chicken context sensitive dictation peaking'''
+        actions.insert(" ")
+    
+    def fire_chicken_context_sensitive_dictation_perform_after_peek_cleanup(left: bool, right: bool, before: str, after: str):
+        '''Performs the cleanup for the fire chicken context sensitive dictation peaking'''
+        if right:
+            actions.key("delete")  # remove space
+        else:
+            actions.key("backspace")  # remove the space
     
     def fire_chicken_context_sensitive_dictation_perform_peek_left() -> str:
         '''Performs the left peek for fire chicken context sensitive dictation'''
