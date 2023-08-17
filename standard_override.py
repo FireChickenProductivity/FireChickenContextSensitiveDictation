@@ -48,17 +48,24 @@ class ContextSensitiveDictationActions:
             dictation_peek() is intended for use before inserting text, so it may
             delete any currently selected text.
             """
-            if not (left or right):
-                return None, None
+            if context_is_not_needed(left, right): return None, None
             global stored_context
-            if stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get():
-                return stored_context.get_before(), stored_context.get_after()
+            if can_rely_on_stored_context(stored_context): return stored_context.get_context_information()
             global performing_dictation_peek
             performing_dictation_peek = True
             before, after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek(left, right)
             performing_dictation_peek = False
-            if right and should_use_basic_action_recorder_for_context.get(): stored_context.update_after(after)
+            if should_update_stored_after_context(right): stored_context.update_after(after)
             return before, after
+        
+def context_is_not_needed(left: bool, right: bool) -> bool:
+    return not (left or right)
+
+def can_rely_on_stored_context(stored_context):
+    return stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get()
+
+def should_update_stored_after_context(right: bool):
+    return right and should_use_basic_action_recorder_for_context.get()
 
 performing_dictation_peek: bool = False
 
@@ -97,6 +104,10 @@ class StoredContext:
     
     def get_after(self):
         return self.stored_after
+    
+    def get_context_information(self):
+        return self.get_before(), self.get_after()
+        
 stored_context = StoredContext()
 
 def on_basic_action(action):
