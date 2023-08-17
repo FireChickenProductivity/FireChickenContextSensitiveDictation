@@ -76,7 +76,7 @@ class StoredContext:
         self.stored_after = ''
     
     def update_before(self, before: str):
-        if before.isspace():
+        if before.isspace() or len(before) <= 1 or not before[0].isspace():
             self.stored_before += before
         else:
             self.stored_before = before
