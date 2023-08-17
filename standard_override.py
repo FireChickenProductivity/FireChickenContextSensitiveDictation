@@ -126,7 +126,7 @@ class Actions:
         '''Performs the initial setup for the fire chicken context sensitive dictation peaking'''
         actions.insert(" ")
     
-    def fire_chicken_context_sensitive_dictation_perform_after_peek_cleanup(left: bool, right: bool, before: str, after: str):
+    def fire_chicken_context_sensitive_dictation_perform_after_peek_cleanup(left: bool, right: bool, before: Optional[str], after: Optional[str]):
         '''Performs the cleanup for the fire chicken context sensitive dictation peaking'''
         if right:
             actions.key("delete")  # remove space
