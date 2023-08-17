@@ -55,31 +55,9 @@ class ContextSensitiveDictationActions:
                 return stored_context.get_before(), stored_context.get_after()
             global performing_dictation_peek
             performing_dictation_peek = True
-            before, after = None, None
-            actions.insert(" ")
-            if left:
-                if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
-                    before = stored_context.get_before()
-                else:
-                    actions.user.fire_chicken_context_sensitive_dictation_select_before()
-                    wait_copy_delay()
-                    selected_text: str = actions.edit.selected_text()
-                    before: str = selected_text[:-1]
-                    if should_display_debug_output(): print_debug_output(f'Before text is: ({before})')
-                    actions.user.fire_chicken_context_sensitive_dictation_unselect_before(before, selected_text)
-            if not right:
-                actions.key("backspace")  # remove the space
-            else:
-                actions.user.fire_chicken_context_sensitive_dictation_select_after()
-                wait_copy_delay()
-                selected_text: str = actions.edit.selected_text()
-                after: str = selected_text[1:]
-                if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
-                actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
-                actions.key("delete")  # remove space
-                if should_use_basic_action_recorder_for_context.get():
-                    stored_context.update_after(after)
+            before, after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek(left, right)
             performing_dictation_peek = False
+            if right and should_use_basic_action_recorder_for_context.get(): stored_context.update_after(after)
             return before, after
 
 performing_dictation_peek: bool = False
@@ -133,6 +111,47 @@ def on_basic_action(action):
 module = Module()
 @module.action_class
 class Actions:
+    def fire_chicken_context_sensitive_dictation_perform_manual_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
+        '''Performs the manual peek for fire chicken context sensitive dictation'''
+        before, after = None, None
+        actions.insert(" ")
+        if left:
+            before = actions.user.fire_chicken_context_sensitive_dictation_perform_peek_left()
+        if not right:
+            actions.key("backspace")  # remove the space
+        else:
+            after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_right()
+            actions.key("delete")  # remove space
+        return before, after
+    
+    def fire_chicken_context_sensitive_dictation_perform_peek_left() -> str:
+        '''Performs the left peek for fire chicken context sensitive dictation'''
+        if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
+            before = stored_context.get_before()
+        else:
+            before = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_left()
+        return before
+        
+    def fire_chicken_context_sensitive_dictation_perform_manual_peek_left() -> str:
+        '''Performs the manual left peek for fire chicken context sensitive dictation'''
+        actions.user.fire_chicken_context_sensitive_dictation_select_before()
+        wait_copy_delay()
+        selected_text: str = actions.edit.selected_text()
+        before: str = selected_text[:-1]
+        if should_display_debug_output(): print_debug_output(f'Before text is: ({before})')
+        actions.user.fire_chicken_context_sensitive_dictation_unselect_before(before, selected_text)
+        return before
+
+    def fire_chicken_context_sensitive_dictation_perform_manual_peek_right() -> str:
+        '''Performs the manual right peek for fire chicken context sensitive dictation'''
+        actions.user.fire_chicken_context_sensitive_dictation_select_after()
+        wait_copy_delay()
+        selected_text: str = actions.edit.selected_text()
+        after: str = selected_text[1:]
+        if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
+        actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
+        return after
+
     def fire_chicken_context_sensitive_dictation_select_before():
         '''Selects the text before the cursor for context sensitive dictation'''
         actions.edit.extend_word_left()
