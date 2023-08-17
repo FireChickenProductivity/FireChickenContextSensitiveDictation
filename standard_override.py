@@ -82,12 +82,21 @@ class StoredContext:
         self.stored_before = ''
         self.stored_after = ''
     
-    def update_before(self, before: str):
-        if before.isspace() or len(before) <= 1 or not before[0].isspace():
+    def update_before(self, action):
+        before: str = StoredContext._get_text_from_insert_action(action)
+        if StoredContext._new_before_context_information_is_inadequate(before):
             self.stored_before += before
         else:
             self.stored_before = before
         self.has_before_information = True
+    
+    @staticmethod
+    def _get_text_from_insert_action(action) -> str:
+        return action.get_arguments()[0]
+
+    @staticmethod
+    def _new_before_context_information_is_inadequate(before: str) -> bool:
+        return before.isspace() or len(before) <= 1 or not before[0].isspace()
     
     def update_after(self, after: str):
         self.stored_after = after
@@ -111,13 +120,22 @@ class StoredContext:
 stored_context = StoredContext()
 
 def on_basic_action(action):
-    if should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek:
-        global stored_context
-        if action.get_name() == 'insert':
-            inserted_text = action.get_arguments()[0]
-            stored_context.update_before(inserted_text)
-        else:
-            stored_context.consider_context_irrelevant()
+    if should_update_context_information():
+        update_context_information(action)
+
+def should_update_context_information() -> bool:
+    global performing_dictation_peek
+    return should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek
+
+def update_context_information(action):
+    global stored_context
+    if action_is_inserting_text(action):
+        stored_context.update_before(action)
+    else:
+        stored_context.consider_context_irrelevant()
+
+def action_is_inserting_text(action) -> bool:
+    return action.get_name() == 'insert'
 
 module = Module()
 @module.action_class
