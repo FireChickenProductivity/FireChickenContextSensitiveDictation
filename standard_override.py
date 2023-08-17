@@ -135,6 +135,7 @@ class Actions:
     
     def fire_chicken_context_sensitive_dictation_perform_peek_left() -> str:
         '''Performs the left peek for fire chicken context sensitive dictation'''
+        global stored_context
         if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
             before = stored_context.get_before()
         else:
