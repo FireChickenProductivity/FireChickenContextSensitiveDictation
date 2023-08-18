@@ -1,5 +1,7 @@
 from talon import Module, Context, actions, app, settings
 from typing import Optional
+from .stored_context import StoredContext
+from .basic_action_recorder_interface import register_basic_action_recorder_callback_function, unregister_basic_action_recorder_callback_function, action_is_inserting_text
 
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
@@ -68,55 +70,6 @@ def should_update_stored_after_context(right: bool):
     return right and should_use_basic_action_recorder_for_context.get()
 
 performing_dictation_peek: bool = False
-
-class StoredContext:
-    def __init__(self):
-        self.stored_before: str = ''
-        self.stored_after: str = ''
-        self.has_before_information: bool = False
-        self.has_after_information: bool = False
-    
-    def consider_context_irrelevant(self):
-        self.has_before_information = False
-        self.has_after_information = False
-        self.stored_before = ''
-        self.stored_after = ''
-    
-    def update_before(self, action):
-        before: str = StoredContext._get_text_from_insert_action(action)
-        if StoredContext._new_before_context_information_is_inadequate(before):
-            self.stored_before += before
-        else:
-            self.stored_before = before
-        self.has_before_information = True
-    
-    @staticmethod
-    def _get_text_from_insert_action(action) -> str:
-        return action.get_arguments()[0]
-
-    @staticmethod
-    def _new_before_context_information_is_inadequate(before: str) -> bool:
-        return before.isspace() or len(before) <= 1 or not before[0].isspace()
-    
-    def update_after(self, after: str):
-        self.stored_after = after
-        self.has_after_information = True
-    
-    def has_relevant_before_information(self):
-        return self.has_before_information
-    
-    def has_relevant_after_information(self):
-        return self.has_after_information
-    
-    def get_before(self):
-        return self.stored_before
-    
-    def get_after(self):
-        return self.stored_after
-    
-    def get_context_information(self):
-        return self.get_before(), self.get_after()
-        
 stored_context = StoredContext()
 
 def on_basic_action(action):
@@ -133,9 +86,6 @@ def update_context_information(action):
         stored_context.update_before(action)
     else:
         stored_context.consider_context_irrelevant()
-
-def action_is_inserting_text(action) -> bool:
-    return action.get_name() == 'insert'
 
 module = Module()
 @module.action_class
@@ -229,17 +179,8 @@ def can_rely_on_stored_before_context(stored_context):
 def setup():
     handle_should_use_basic_action_recorder_for_context_setting_change(should_use_basic_action_recorder_for_context.get())
 
-REGISTRATION_NAME: str = 'FireChickenContextSensitiveDictation'
-def register_basic_action_recorder_callback_function():
-    try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, REGISTRATION_NAME)
-    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
-
-def unregister_basic_action_recorder_callback_function():
-    try: actions.user.basic_action_recorder_unregister_callback_function_with_name(REGISTRATION_NAME)
-    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
-
 def handle_should_use_basic_action_recorder_for_context_setting_change(new_value):
-    if new_value: register_basic_action_recorder_callback_function()
+    if new_value: register_basic_action_recorder_callback_function(on_basic_action)
     else: unregister_basic_action_recorder_callback_function()
     stored_context.consider_context_irrelevant()
 
