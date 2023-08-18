@@ -1,5 +1,7 @@
 from talon import Module, Context, actions, app, settings
 from typing import Optional
+from .stored_context import StoredContext
+from .basic_action_recorder_interface import register_basic_action_recorder_callback_function, unregister_basic_action_recorder_callback_function, action_is_inserting_text
 
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
@@ -48,65 +50,42 @@ class ContextSensitiveDictationActions:
             dictation_peek() is intended for use before inserting text, so it may
             delete any currently selected text.
             """
-            if not (left or right):
-                return None, None
+            if context_is_not_needed(left, right): return None, None
             global stored_context
-            if stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get():
-                return stored_context.get_before(), stored_context.get_after()
+            if can_rely_on_stored_context(stored_context): return stored_context.get_context_information()
             global performing_dictation_peek
             performing_dictation_peek = True
             before, after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek(left, right)
             performing_dictation_peek = False
-            if right and should_use_basic_action_recorder_for_context.get(): stored_context.update_after(after)
+            if should_update_stored_after_context(right): stored_context.update_after(after)
             return before, after
+        
+def context_is_not_needed(left: bool, right: bool) -> bool:
+    return not (left or right)
+
+def can_rely_on_stored_context(stored_context):
+    return stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get()
+
+def should_update_stored_after_context(right: bool):
+    return right and should_use_basic_action_recorder_for_context.get()
 
 performing_dictation_peek: bool = False
-
-class StoredContext:
-    def __init__(self):
-        self.stored_before: str = ''
-        self.stored_after: str = ''
-        self.has_before_information: bool = False
-        self.has_after_information: bool = False
-    
-    def consider_context_irrelevant(self):
-        self.has_before_information = False
-        self.has_after_information = False
-        self.stored_before = ''
-        self.stored_after = ''
-    
-    def update_before(self, before: str):
-        if before.isspace() or len(before) <= 1 or not before[0].isspace():
-            self.stored_before += before
-        else:
-            self.stored_before = before
-        self.has_before_information = True
-    
-    def update_after(self, after: str):
-        self.stored_after = after
-        self.has_after_information = True
-    
-    def has_relevant_before_information(self):
-        return self.has_before_information
-    
-    def has_relevant_after_information(self):
-        return self.has_after_information
-    
-    def get_before(self):
-        return self.stored_before
-    
-    def get_after(self):
-        return self.stored_after
 stored_context = StoredContext()
 
 def on_basic_action(action):
-    if should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek:
-        global stored_context
-        if action.get_name() == 'insert':
-            inserted_text = action.get_arguments()[0]
-            stored_context.update_before(inserted_text)
-        else:
-            stored_context.consider_context_irrelevant()
+    if should_update_context_information():
+        update_context_information(action)
+
+def should_update_context_information() -> bool:
+    global performing_dictation_peek
+    return should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek
+
+def update_context_information(action):
+    global stored_context
+    if action_is_inserting_text(action):
+        stored_context.update_before(action)
+    else:
+        stored_context.consider_context_irrelevant()
 
 module = Module()
 @module.action_class
@@ -136,7 +115,7 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_perform_peek_left() -> str:
         '''Performs the left peek for fire chicken context sensitive dictation'''
         global stored_context
-        if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
+        if can_rely_on_stored_before_context(stored_context):
             before = stored_context.get_before()
         else:
             before = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_left()
@@ -194,20 +173,14 @@ def wait_delay_setting(setting):
 def should_display_debug_output():
     return debug_mode_setting.get()
 
+def can_rely_on_stored_before_context(stored_context):
+    return stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get()
+
 def setup():
     handle_should_use_basic_action_recorder_for_context_setting_change(should_use_basic_action_recorder_for_context.get())
 
-REGISTRATION_NAME: str = 'FireChickenContextSensitiveDictation'
-def register_basic_action_recorder_callback_function():
-    try: actions.user.basic_action_recorder_register_callback_function_with_name(on_basic_action, REGISTRATION_NAME)
-    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
-
-def unregister_basic_action_recorder_callback_function():
-    try: actions.user.basic_action_recorder_unregister_callback_function_with_name(REGISTRATION_NAME)
-    except: print('Fire Chicken Context Sensitive Dictation: The BAR must be installed to use basic action recording for context.')
-
 def handle_should_use_basic_action_recorder_for_context_setting_change(new_value):
-    if new_value: register_basic_action_recorder_callback_function()
+    if new_value: register_basic_action_recorder_callback_function(on_basic_action)
     else: unregister_basic_action_recorder_callback_function()
     stored_context.consider_context_irrelevant()
 
