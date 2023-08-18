@@ -19,7 +19,7 @@ ending_delay = module.setting(
 select_word_delay = module.setting(
     'fire_chicken_context_sensitive_dictation_select_word_delay',
     type = int,
-    default = 200,
+    default = 0,
     desc = 'How long to pause in milliseconds between word selection in the default fire chicken context sensitive dictation behavior'
 )
 
