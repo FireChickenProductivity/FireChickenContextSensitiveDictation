@@ -165,7 +165,7 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_perform_peek_left() -> str:
         '''Performs the left peek for fire chicken context sensitive dictation'''
         global stored_context
-        if stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get():
+        if can_rely_on_stored_before_context(stored_context):
             before = stored_context.get_before()
         else:
             before = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_left()
@@ -222,6 +222,9 @@ def wait_delay_setting(setting):
 
 def should_display_debug_output():
     return debug_mode_setting.get()
+
+def can_rely_on_stored_before_context(stored_context):
+    return stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get()
 
 def setup():
     handle_should_use_basic_action_recorder_for_context_setting_change(should_use_basic_action_recorder_for_context.get())
