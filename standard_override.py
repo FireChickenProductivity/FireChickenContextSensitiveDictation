@@ -13,6 +13,20 @@ copy_delay = module.setting(
     desc = 'How long to pause in milliseconds when copying.'
 )
 
+ending_delay = module.setting(
+    'fire_chicken_context_sensitive_dictation_ending_delay',
+    type = int,
+    default = 0,
+    desc = 'How long to pause in milliseconds after peeking'
+)
+
+select_word_delay = module.setting(
+    'fire_chicken_context_sensitive_dictation_select_word_delay',
+    type = int,
+    default = 0,
+    desc = 'How long to pause in milliseconds between word selection in the default fire chicken context sensitive dictation behavior'
+)
+
 debug_mode_setting = module.setting(
     'fire_chicken_context_sensitive_dictation_print_debug_output',
     type = int,
@@ -58,6 +72,7 @@ class ContextSensitiveDictationActions:
             before, after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek(left, right)
             performing_dictation_peek = False
             if should_update_stored_after_context(right): stored_context.update_after(after)
+            wait_ending_delay()
             return before, after
         
 def context_is_not_needed(left: bool, right: bool) -> bool:
@@ -144,6 +159,7 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_select_before():
         '''Selects the text before the cursor for context sensitive dictation'''
         actions.edit.extend_word_left()
+        wait_select_word_delay()
         actions.edit.extend_word_left()
     
     def fire_chicken_context_sensitive_dictation_unselect_before(before: str, selected_text: str):
@@ -154,6 +170,7 @@ class Actions:
         '''Selects the text after the cursor for context sensitive dictation'''
         actions.edit.left()
         actions.edit.extend_word_right()
+        wait_select_word_delay()
         actions.edit.extend_word_right()
     
     def fire_chicken_context_sensitive_dictation_unselect_after(after: str, selected_text: str):
@@ -165,6 +182,12 @@ def print_debug_output(output: str):
 
 def wait_copy_delay():
     wait_delay_setting(copy_delay)
+
+def wait_ending_delay():
+    wait_delay_setting(ending_delay)
+
+def wait_select_word_delay():
+    wait_delay_setting(select_word_delay)
 
 def wait_delay_setting(setting):
     delay_amount = setting.get()
