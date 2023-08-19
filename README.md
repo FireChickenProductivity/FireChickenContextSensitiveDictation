@@ -6,6 +6,10 @@ user.fire_chicken_context_sensitive_dictation_copy_delay: determines how long in
 
 user.fire_chicken_context_sensitive_dictation_use_basic_action_recorder_for_context: If nonzero and the basic action recorder is installed (https://github.com/FireChickenProductivity/BAR), it will be used for context information. Every time a basic action other than a text insert action is performed outside of the context grabbing, the context sensitive dictation will have to reassess context manually. Otherwise, it will rely on text insertion information obtained from the basic action recorder for context to the left of the cursor and remember the context to the right of the cursor from the last time it manually grabbed context.
 
+user.fire_chicken_context_sensitive_dictation_ending_delay: determines how long in milliseconds to pause after getting context through peeking manually. Set to 0 by default. This can be useful if the peeking operations happening too quickly before inserting text can cause problems in a given application.
+
+user.fire_chicken_context_sensitive_dictation_select_word_delay: determines how long in milliseconds to pause before selecting a word in the default implementation of the contact sensitive dictation peeking. Set to 0 by default.
+
 # Giving Credit
 This repository contains some code taken from the talon community repository (https://github.com/talonhub/community/blob/main/LICENSE) distributed under the following license: 
 MIT License
