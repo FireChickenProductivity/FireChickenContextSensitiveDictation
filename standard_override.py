@@ -2,16 +2,10 @@ from talon import Module, Context, actions, app, settings
 from typing import Optional
 from .stored_context import StoredContext
 from .basic_action_recorder_interface import register_basic_action_recorder_callback_function, unregister_basic_action_recorder_callback_function, action_is_inserting_text
+from .delay_settings import wait_select_word_delay, wait_copy_delay, wait_ending_delay
 
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
-
-copy_delay = module.setting(
-    'fire_chicken_context_sensitive_dictation_copy_delay',
-    type = int,
-    default = 200,
-    desc = 'How long to pause in milliseconds when copying.'
-)
 
 debug_mode_setting = module.setting(
     'fire_chicken_context_sensitive_dictation_print_debug_output',
@@ -58,6 +52,7 @@ class ContextSensitiveDictationActions:
             before, after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek(left, right)
             performing_dictation_peek = False
             if should_update_stored_after_context(right): stored_context.update_after(after)
+            wait_ending_delay()
             return before, after
         
 def context_is_not_needed(left: bool, right: bool) -> bool:
@@ -143,7 +138,9 @@ class Actions:
 
     def fire_chicken_context_sensitive_dictation_select_before():
         '''Selects the text before the cursor for context sensitive dictation'''
+        wait_select_word_delay()
         actions.edit.extend_word_left()
+        wait_select_word_delay()
         actions.edit.extend_word_left()
     
     def fire_chicken_context_sensitive_dictation_unselect_before(before: str, selected_text: str):
@@ -153,7 +150,9 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_select_after():
         '''Selects the text after the cursor for context sensitive dictation'''
         actions.edit.left()
+        wait_select_word_delay()
         actions.edit.extend_word_right()
+        wait_select_word_delay()
         actions.edit.extend_word_right()
     
     def fire_chicken_context_sensitive_dictation_unselect_after(after: str, selected_text: str):
@@ -162,13 +161,6 @@ class Actions:
 
 def print_debug_output(output: str):
     print('ContextSensitiveDictation:', output)
-
-def wait_copy_delay():
-    wait_delay_setting(copy_delay)
-
-def wait_delay_setting(setting):
-    delay_amount = setting.get()
-    actions.sleep(f'{delay_amount}ms')
 
 def should_display_debug_output():
     return debug_mode_setting.get()
