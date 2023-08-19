@@ -138,6 +138,7 @@ class Actions:
 
     def fire_chicken_context_sensitive_dictation_select_before():
         '''Selects the text before the cursor for context sensitive dictation'''
+        wait_select_word_delay()
         actions.edit.extend_word_left()
         wait_select_word_delay()
         actions.edit.extend_word_left()
@@ -149,6 +150,7 @@ class Actions:
     def fire_chicken_context_sensitive_dictation_select_after():
         '''Selects the text after the cursor for context sensitive dictation'''
         actions.edit.left()
+        wait_select_word_delay()
         actions.edit.extend_word_right()
         wait_select_word_delay()
         actions.edit.extend_word_right()
