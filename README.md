@@ -10,6 +10,10 @@ user.fire_chicken_context_sensitive_dictation_ending_delay: determines how long 
 
 user.fire_chicken_context_sensitive_dictation_select_word_delay: determines how long in milliseconds to pause before selecting a word in the default implementation of the contact sensitive dictation peeking. Set to 0 by default.
 
+user.fire_chicken_context_sensitive_dictation_post_copy_delay: determines how long in milliseconds to pause after copying. Consider increasing this if context sensitive dictation sometimes acts as if it is at the start of a new sentence. Consider setting this to 200 when working with Microsoft Word on windows.
+
+user.fire_chicken_context_sensitive_dictation_mid_peek_delay: determines how long in milliseconds to pause in between manually determining what text is on the left and manually determining what text is on the right.
+
 # Giving Credit
 This repository contains some code taken from the talon community repository (https://github.com/talonhub/community/blob/main/LICENSE) distributed under the following license: 
 MIT License
