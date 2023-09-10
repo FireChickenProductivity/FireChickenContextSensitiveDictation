@@ -1,4 +1,5 @@
 from talon import Context, actions
+from .delay_settings import wait_select_word_delay
 
 context = Context()
 context.matches = '''
@@ -17,4 +18,5 @@ class MicrosoftWordActions:
     
     def fire_chicken_context_sensitive_dictation_select_before():
         '''Selects the text before the cursor for context sensitive dictation in Microsoft Word'''
+        wait_select_word_delay()
         actions.edit.extend_word_left()
