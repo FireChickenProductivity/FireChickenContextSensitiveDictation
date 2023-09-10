@@ -124,7 +124,6 @@ class Actions:
         wait_copy_delay()
         selected_text: str = get_selected_text()
         before: str = selected_text[:-1]
-        #wait_post_copy_delay()
         if should_display_debug_output(): print_debug_output(f'Before text is: ({before})')
         actions.user.fire_chicken_context_sensitive_dictation_unselect_before(before, selected_text)
         return before
