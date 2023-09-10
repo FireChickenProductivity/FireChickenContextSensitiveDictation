@@ -132,6 +132,7 @@ class Actions:
         actions.user.fire_chicken_context_sensitive_dictation_select_after()
         wait_copy_delay()
         selected_text: str = actions.edit.selected_text()
+        wait_post_copy_delay()
         after: str = selected_text[1:]
         if should_display_debug_output(): print_debug_output(f'After text is: ({after})')
         actions.user.fire_chicken_context_sensitive_dictation_unselect_after(after, selected_text)
