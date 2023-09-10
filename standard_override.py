@@ -2,7 +2,7 @@ from talon import Module, Context, actions, app, settings
 from typing import Optional
 from .stored_context import StoredContext
 from .basic_action_recorder_interface import register_basic_action_recorder_callback_function, unregister_basic_action_recorder_callback_function, action_is_inserting_text
-from .delay_settings import wait_select_word_delay, wait_copy_delay, wait_ending_delay
+from .delay_settings import wait_select_word_delay, wait_copy_delay, wait_ending_delay, wait_post_copy_delay
 
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
@@ -122,6 +122,7 @@ class Actions:
         wait_copy_delay()
         selected_text: str = actions.edit.selected_text()
         before: str = selected_text[:-1]
+        wait_post_copy_delay()
         if should_display_debug_output(): print_debug_output(f'Before text is: ({before})')
         actions.user.fire_chicken_context_sensitive_dictation_unselect_before(before, selected_text)
         return before
