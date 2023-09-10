@@ -2,7 +2,7 @@ from talon import Module, Context, actions, app, settings
 from typing import Optional
 from .stored_context import StoredContext
 from .basic_action_recorder_interface import register_basic_action_recorder_callback_function, unregister_basic_action_recorder_callback_function, action_is_inserting_text
-from .delay_settings import wait_select_word_delay, wait_copy_delay, wait_ending_delay, wait_post_copy_delay
+from .delay_settings import wait_select_word_delay, wait_copy_delay, wait_ending_delay, wait_post_copy_delay, wait_mid_peek_delay
 
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
@@ -91,6 +91,7 @@ class Actions:
         actions.user.fire_chicken_context_sensitive_dictation_perform_before_peek_setup(left, right)
         if left:
             before = actions.user.fire_chicken_context_sensitive_dictation_perform_peek_left()
+        wait_mid_peek_delay()
         if right:
             after = actions.user.fire_chicken_context_sensitive_dictation_perform_manual_peek_right()
         actions.user.fire_chicken_context_sensitive_dictation_perform_after_peek_cleanup(left, right, before, after)
