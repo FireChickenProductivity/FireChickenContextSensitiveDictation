@@ -8,15 +8,19 @@ from .clipboard import get_selected_text
 module = Module()
 module.tag('fire_chicken_context_sensitive_dictation', desc = 'Enables fire chicken context sensitive dictation')
 
-debug_mode_setting = module.setting(
-    'fire_chicken_context_sensitive_dictation_print_debug_output',
+debug_mode_setting_setting_name = 'fire_chicken_context_sensitive_dictation_print_debug_output'
+debug_mode_setting = 'user.' + debug_mode_setting_setting_name
+module.setting(
+    debug_mode_setting_setting_name,
     type = int,
     default = 0,
     desc = 'If nonzero, debug information is printed to the console'
 )
 
-should_use_basic_action_recorder_for_context = module.setting(
-    'fire_chicken_context_sensitive_dictation_use_basic_action_recorder_for_context',
+should_use_basic_action_recorder_for_context_setting_name = 'fire_chicken_context_sensitive_dictation_use_basic_action_recorder_for_context'
+should_use_basic_action_recorder_for_context = 'user.' + should_use_basic_action_recorder_for_context_setting_name
+module.setting(
+    should_use_basic_action_recorder_for_context_setting_name,
     type = int,
     default = 0,
     desc = 'If nonzero and the basic action recorder is installed, fire chicken context sensitive dictation uses it for context information when the user has not used a non insert action'
@@ -60,10 +64,10 @@ def context_is_not_needed(left: bool, right: bool) -> bool:
     return not (left or right)
 
 def can_rely_on_stored_context(stored_context):
-    return stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and should_use_basic_action_recorder_for_context.get()
+    return stored_context.has_relevant_before_information() and stored_context.has_relevant_after_information() and settings.get(should_use_basic_action_recorder_for_context)
 
 def should_update_stored_after_context(right: bool):
-    return right and should_use_basic_action_recorder_for_context.get()
+    return right and settings.get(should_use_basic_action_recorder_for_context)
 
 performing_dictation_peek: bool = False
 stored_context = StoredContext()
@@ -74,7 +78,7 @@ def on_basic_action(action):
 
 def should_update_context_information() -> bool:
     global performing_dictation_peek
-    return should_use_basic_action_recorder_for_context.get() and not performing_dictation_peek
+    return settings.get(should_use_basic_action_recorder_for_context) and not performing_dictation_peek
 
 def update_context_information(action):
     global stored_context
@@ -166,13 +170,13 @@ def print_debug_output(output: str):
     print('ContextSensitiveDictation:', output)
 
 def should_display_debug_output():
-    return debug_mode_setting.get()
+    return settings.get(debug_mode_setting)
 
 def can_rely_on_stored_before_context(stored_context):
-    return stored_context.has_relevant_before_information() and should_use_basic_action_recorder_for_context.get()
+    return stored_context.has_relevant_before_information() and settings.get(should_use_basic_action_recorder_for_context)
 
 def setup():
-    handle_should_use_basic_action_recorder_for_context_setting_change(should_use_basic_action_recorder_for_context.get())
+    handle_should_use_basic_action_recorder_for_context_setting_change(settings.get(should_use_basic_action_recorder_for_context))
 
 def handle_should_use_basic_action_recorder_for_context_setting_change(new_value):
     if new_value: register_basic_action_recorder_callback_function(on_basic_action)
